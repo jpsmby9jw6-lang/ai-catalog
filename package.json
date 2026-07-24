@@ -1,0 +1,47 @@
+{
+  "name": "ai-catalog",
+  "version": "1.0.0",
+  "description": "Machine-readable catalog specification for AI agent discoverability",
+  "main": "cli/index.js",
+  "bin": {
+    "ai-catalog": "cli/index.js"
+  },
+  "scripts": {
+    "validate": "node cli/index.js validate",
+    "generate": "node cli/index.js generate",
+    "lint": "node cli/index.js lint",
+    "diff": "node cli/index.js diff",
+    "tokens": "node cli/index.js tokens",
+    "serve": "node cli/index.js serve",
+    "test": "node cli/index.js test",
+    "test:suite": "node tests/test.js",
+    "schema": "node cli/index.js schema",
+    "example:validate": "node cli/index.js validate examples/api-project.json",
+    "example:test": "node cli/index.js test examples/api-project.json"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "discovery",
+    "specification",
+    "tools",
+    "capabilities",
+    "github",
+    "ard",
+    "agentic-resource-discovery"
+  ],
+  "author": "AI Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/example/ai-catalog-spec"
+  },
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "js-yaml": "^5.2.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "preferGlobal": true
+}

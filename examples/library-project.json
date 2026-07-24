@@ -1,0 +1,184 @@
+{
+  "version": "1.0.0",
+  "name": "DataForge",
+  "description": "Python library for high-performance data transformation, cleaning, and validation pipelines",
+  "repository": {
+    "url": "https://github.com/example/dataforge",
+    "branch": "main"
+  },
+  "capabilities": [
+    {
+      "id": "data_cleaning",
+      "name": "Data Cleaning",
+      "description": "Remove duplicates, handle missing values, normalize formats",
+      "category": "library"
+    },
+    {
+      "id": "validation",
+      "name": "Data Validation",
+      "description": "Validate data against schemas, type checking, constraint enforcement",
+      "category": "library"
+    },
+    {
+      "id": "transformation",
+      "name": "Data Transformation",
+      "description": "Map, filter, aggregate, and reshape data",
+      "category": "library"
+    },
+    {
+      "id": "performance",
+      "name": "High Performance Processing",
+      "description": "Optimized for large datasets with parallel processing",
+      "category": "library"
+    }
+  ],
+  "tools": [
+    {
+      "id": "dataframe_clean",
+      "name": "Clean DataFrame",
+      "description": "Clean a pandas or polars DataFrame by removing duplicates, filling nulls, and normalizing data types",
+      "type": "function",
+      "endpoint": "dataforge.cleaning.DataframeCleanser.clean()",
+      "inputs": {
+        "type": "object",
+        "required": ["dataframe"],
+        "properties": {
+          "dataframe": {
+            "type": "string",
+            "description": "Variable name of the dataframe to clean"
+          },
+          "remove_duplicates": { "type": "boolean", "default": true },
+          "fill_nulls": { "type": "boolean", "default": true },
+          "normalize_types": { "type": "boolean", "default": true }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "cleaned_dataframe": { "type": "object" },
+          "operations_performed": { "type": "array" },
+          "rows_affected": { "type": "integer" }
+        }
+      },
+      "examples": [
+        {
+          "input": {
+            "dataframe": "raw_data",
+            "remove_duplicates": true,
+            "fill_nulls": true
+          },
+          "output": {
+            "cleaned_dataframe": {},
+            "operations_performed": ["removed 150 duplicates", "filled 342 null values"],
+            "rows_affected": 492
+          }
+        }
+      ],
+      "requires_approval": false,
+      "auth": "none",
+      "ai_safe": true
+    },
+    {
+      "id": "validate_schema",
+      "name": "Validate Against Schema",
+      "description": "Validate a dataframe against a predefined schema definition",
+      "type": "function",
+      "endpoint": "dataforge.validation.SchemaValidator.validate()",
+      "inputs": {
+        "type": "object",
+        "required": ["dataframe", "schema"],
+        "properties": {
+          "dataframe": { "type": "string" },
+          "schema": {
+            "type": "object",
+            "description": "Schema definition with column types and constraints"
+          },
+          "fail_on_error": { "type": "boolean", "default": false }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "valid": { "type": "boolean" },
+          "errors": { "type": "array" },
+          "warnings": { "type": "array" }
+        }
+      },
+      "requires_approval": false,
+      "auth": "none",
+      "ai_safe": true
+    },
+    {
+      "id": "transform_pipeline",
+      "name": "Execute Transform Pipeline",
+      "description": "Apply a series of transformations to data in sequence",
+      "type": "function",
+      "endpoint": "dataforge.transform.Pipeline.execute()",
+      "inputs": {
+        "type": "object",
+        "required": ["dataframe", "steps"],
+        "properties": {
+          "dataframe": { "type": "string" },
+          "steps": {
+            "type": "array",
+            "items": { "type": "object" },
+            "description": "Array of transformation steps"
+          }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "result": { "type": "object" },
+          "steps_executed": { "type": "integer" },
+          "execution_time_ms": { "type": "number" }
+        }
+      },
+      "requires_approval": false,
+      "rate_limit": { "requests_per_hour": 1000 },
+      "auth": "none",
+      "ai_safe": true
+    }
+  ],
+  "permissions": {
+    "default_access": "read",
+    "agent_rules": [
+      {
+        "agent_pattern": "*",
+        "access": "read",
+        "allowed_tools": ["dataframe_clean", "validate_schema", "transform_pipeline"],
+        "human_approval_required": false
+      }
+    ]
+  },
+  "dependencies": [
+    {
+      "name": "pandas",
+      "url": "https://pandas.pydata.org",
+      "required": true
+    },
+    {
+      "name": "polars",
+      "url": "https://www.pola-rs.com",
+      "required": false
+    },
+    {
+      "name": "numpy",
+      "url": "https://numpy.org",
+      "required": true
+    }
+  ],
+  "documentation": {
+    "main": "https://dataforge.example.com/docs",
+    "quickstart": "https://dataforge.example.com/docs/quickstart",
+    "api_spec": "https://dataforge.example.com/docs/api",
+    "examples_dir": "examples/"
+  },
+  "metadata": {
+    "maintained": true,
+    "maturity": "stable",
+    "last_updated": "2026-07-20T10:15:00Z",
+    "contact": "dev@dataforge-example.com",
+    "tags": ["data", "python", "etl", "pandas", "cleaning", "validation"]
+  }
+}

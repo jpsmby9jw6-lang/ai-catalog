@@ -1,0 +1,158 @@
+{
+  "version": "1.0.0",
+  "name": "Weather API",
+  "description": "RESTful API for real-time weather data, forecasts, and historical climate information",
+  "repository": {
+    "url": "https://github.com/example/weather-api",
+    "branch": "main"
+  },
+  "capabilities": [
+    {
+      "id": "current_weather",
+      "name": "Current Weather Data",
+      "description": "Get real-time weather conditions for any location",
+      "category": "api"
+    },
+    {
+      "id": "forecasts",
+      "name": "Weather Forecasts",
+      "description": "7-day and 30-day weather forecasts",
+      "category": "api"
+    },
+    {
+      "id": "historical",
+      "name": "Historical Climate Data",
+      "description": "Historical weather data by location and date range",
+      "category": "api"
+    },
+    {
+      "id": "alerts",
+      "name": "Weather Alerts",
+      "description": "Severe weather warnings and alerts",
+      "category": "api"
+    }
+  ],
+  "tools": [
+    {
+      "id": "get_current_weather",
+      "name": "Get Current Weather",
+      "description": "Fetch current weather conditions for a location. Returns temperature, humidity, wind speed, and conditions.",
+      "type": "api",
+      "endpoint": "https://api.weather.example.com/v1/current",
+      "inputs": {
+        "type": "object",
+        "required": ["location"],
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "City name, coordinates, or postal code"
+          },
+          "units": {
+            "type": "string",
+            "enum": ["metric", "imperial"],
+            "default": "metric"
+          }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "temperature": { "type": "number" },
+          "humidity": { "type": "number" },
+          "condition": { "type": "string" },
+          "wind_speed": { "type": "number" }
+        }
+      },
+      "examples": [
+        {
+          "input": {
+            "location": "San Francisco, CA",
+            "units": "imperial"
+          },
+          "output": {
+            "temperature": 72,
+            "humidity": 65,
+            "condition": "Partly Cloudy",
+            "wind_speed": 8
+          }
+        }
+      ],
+      "requires_approval": false,
+      "rate_limit": {
+        "requests_per_minute": 60,
+        "requests_per_hour": 1000
+      },
+      "auth": "api_key",
+      "ai_safe": true
+    },
+    {
+      "id": "get_forecast",
+      "name": "Get Weather Forecast",
+      "description": "Get 7-day or 30-day weather forecast for a location",
+      "type": "api",
+      "endpoint": "https://api.weather.example.com/v1/forecast",
+      "inputs": {
+        "type": "object",
+        "required": ["location", "days"],
+        "properties": {
+          "location": { "type": "string" },
+          "days": { "type": "integer", "enum": [7, 30] },
+          "units": { "type": "string", "enum": ["metric", "imperial"] }
+        }
+      },
+      "outputs": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "date": { "type": "string" },
+            "high_temp": { "type": "number" },
+            "low_temp": { "type": "number" },
+            "condition": { "type": "string" }
+          }
+        }
+      },
+      "requires_approval": false,
+      "rate_limit": {
+        "requests_per_minute": 30
+      },
+      "auth": "api_key",
+      "ai_safe": true
+    }
+  ],
+  "permissions": {
+    "default_access": "read",
+    "agent_rules": [
+      {
+        "agent_pattern": "claude-*",
+        "access": "read",
+        "allowed_tools": ["get_current_weather", "get_forecast"]
+      },
+      {
+        "agent_pattern": "copilot",
+        "access": "read",
+        "allowed_tools": ["get_current_weather"]
+      }
+    ]
+  },
+  "dependencies": [
+    {
+      "name": "Geo API",
+      "url": "https://api.geonames.org",
+      "required": false
+    }
+  ],
+  "documentation": {
+    "main": "https://github.com/example/weather-api#readme",
+    "quickstart": "https://github.com/example/weather-api/blob/main/docs/quickstart.md",
+    "api_spec": "https://github.com/example/weather-api/blob/main/openapi.yaml",
+    "examples_dir": "examples/"
+  },
+  "metadata": {
+    "maintained": true,
+    "maturity": "stable",
+    "last_updated": "2026-07-22T15:30:00Z",
+    "contact": "support@weather-example.com",
+    "tags": ["weather", "api", "climate", "forecasting"]
+  }
+}

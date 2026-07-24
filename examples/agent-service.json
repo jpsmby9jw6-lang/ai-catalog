@@ -1,0 +1,214 @@
+{
+  "version": "1.0.0",
+  "name": "CodeReview Agent",
+  "description": "Autonomous AI agent that performs intelligent code reviews, identifies bugs, suggests improvements, and enforces coding standards",
+  "repository": {
+    "url": "https://github.com/example/codereview-agent",
+    "branch": "main"
+  },
+  "capabilities": [
+    {
+      "id": "bug_detection",
+      "name": "Automated Bug Detection",
+      "description": "Identify common bugs, memory leaks, and logic errors",
+      "category": "service"
+    },
+    {
+      "id": "style_enforcement",
+      "name": "Code Style Enforcement",
+      "description": "Enforce linting rules and style guidelines",
+      "category": "service"
+    },
+    {
+      "id": "security_review",
+      "name": "Security Review",
+      "description": "Scan for security vulnerabilities and best practices",
+      "category": "service"
+    },
+    {
+      "id": "performance_analysis",
+      "name": "Performance Analysis",
+      "description": "Analyze code for performance bottlenecks and optimization opportunities",
+      "category": "service"
+    },
+    {
+      "id": "test_coverage",
+      "name": "Test Coverage Analysis",
+      "description": "Identify untested code paths and suggest test cases",
+      "category": "service"
+    }
+  ],
+  "tools": [
+    {
+      "id": "review_pull_request",
+      "name": "Review Pull Request",
+      "description": "Trigger a comprehensive code review on a GitHub pull request. Agent will comment with findings.",
+      "type": "api",
+      "endpoint": "https://codereview-agent.example.com/api/v1/review",
+      "inputs": {
+        "type": "object",
+        "required": ["repo", "pr_number"],
+        "properties": {
+          "repo": {
+            "type": "string",
+            "description": "Repository in owner/repo format"
+          },
+          "pr_number": {
+            "type": "integer",
+            "description": "Pull request number"
+          },
+          "review_type": {
+            "type": "string",
+            "enum": ["full", "security", "performance", "style"],
+            "default": "full"
+          },
+          "auto_comment": {
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically post findings as PR comments"
+          }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "review_id": { "type": "string" },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "severity": { "type": "string", "enum": ["critical", "warning", "info"] },
+                "file": { "type": "string" },
+                "line": { "type": "integer" },
+                "message": { "type": "string" },
+                "suggestion": { "type": "string" }
+              }
+            }
+          },
+          "overall_score": { "type": "number" },
+          "status": { "type": "string", "enum": ["approved", "changes_requested", "pending"] }
+        }
+      },
+      "examples": [
+        {
+          "input": {
+            "repo": "myorg/myapp",
+            "pr_number": 42,
+            "review_type": "full"
+          },
+          "output": {
+            "review_id": "rev_abc123",
+            "findings": [
+              {
+                "severity": "critical",
+                "file": "src/auth.js",
+                "line": 45,
+                "message": "Potential SQL injection vulnerability",
+                "suggestion": "Use parameterized queries instead of string concatenation"
+              }
+            ],
+            "overall_score": 7.2,
+            "status": "changes_requested"
+          }
+        }
+      ],
+      "requires_approval": true,
+      "rate_limit": {
+        "requests_per_minute": 10,
+        "requests_per_hour": 100
+      },
+      "auth": "bearer_token",
+      "ai_safe": false
+    },
+    {
+      "id": "analyze_file",
+      "name": "Analyze Single File",
+      "description": "Perform analysis on a single code file without posting to GitHub",
+      "type": "api",
+      "endpoint": "https://codereview-agent.example.com/api/v1/analyze",
+      "inputs": {
+        "type": "object",
+        "required": ["code", "language"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Source code to analyze"
+          },
+          "language": {
+            "type": "string",
+            "enum": ["python", "javascript", "typescript", "java", "go", "rust"],
+            "description": "Programming language"
+          },
+          "checks": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": ["all"],
+            "description": "Which checks to run (or 'all' for default)"
+          }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "issues": { "type": "array" },
+          "suggestions": { "type": "array" },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "complexity": { "type": "number" },
+              "maintainability": { "type": "number" },
+              "test_coverage": { "type": "number" }
+            }
+          }
+        }
+      },
+      "requires_approval": false,
+      "auth": "api_key",
+      "ai_safe": true
+    }
+  ],
+  "permissions": {
+    "default_access": "none",
+    "agent_rules": [
+      {
+        "agent_pattern": "github-actions",
+        "access": "execute",
+        "allowed_tools": ["review_pull_request", "analyze_file"],
+        "human_approval_required": false
+      },
+      {
+        "agent_pattern": "claude-*",
+        "access": "read",
+        "allowed_tools": ["analyze_file"],
+        "human_approval_required": false
+      },
+      {
+        "agent_pattern": "*",
+        "access": "read",
+        "allowed_tools": ["analyze_file"],
+        "human_approval_required": true
+      }
+    ]
+  },
+  "dependencies": [
+    {
+      "name": "GitHub API",
+      "url": "https://api.github.com",
+      "required": true
+    }
+  ],
+  "documentation": {
+    "main": "https://codereview-agent.example.com/docs",
+    "quickstart": "https://codereview-agent.example.com/docs/setup",
+    "api_spec": "https://codereview-agent.example.com/api/docs",
+    "examples_dir": "examples/"
+  },
+  "metadata": {
+    "maintained": true,
+    "maturity": "beta",
+    "last_updated": "2026-07-22T08:00:00Z",
+    "contact": "support@codereview-agent.example.com",
+    "tags": ["code-review", "agent", "automation", "github", "quality"]
+  }
+}

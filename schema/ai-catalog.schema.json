@@ -1,0 +1,260 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Catalog Specification",
+  "description": "Machine-readable catalog for AI agent discovery of capabilities, tools, and resources",
+  "type": "object",
+  "required": ["version", "name", "repository"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d?)$",
+      "description": "Semantic version of this catalog (e.g., '1.0.0')",
+      "default": "1.0.0"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Human-readable name of this repository or project"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1024,
+      "description": "What this project does, in plain language for both humans and AIs"
+    },
+    "repository": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "GitHub or version control repository URL"
+        },
+        "branch": {
+          "type": "string",
+          "default": "main",
+          "description": "Default branch for this catalog"
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "description": "High-level things this project can do",
+      "items": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_-]+$",
+            "description": "Stable, machine-readable identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable capability name"
+          },
+          "description": {
+            "type": "string",
+            "description": "What this capability does"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["api", "library", "tool", "service", "workflow", "data", "model", "other"],
+            "description": "Type of capability"
+          }
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "description": "Executable tools, functions, or endpoints an AI can invoke",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "type"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_-]+$",
+            "description": "Unique identifier for this tool"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable tool name"
+          },
+          "description": {
+            "type": "string",
+            "description": "What this tool does and when to use it"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["function", "api", "cli", "mcp", "webhook", "script"],
+            "description": "How to invoke this tool"
+          },
+          "endpoint": {
+            "type": "string",
+            "description": "URL, function path, or invocation address"
+          },
+          "inputs": {
+            "type": "object",
+            "description": "Expected input parameters (can reference OpenAPI schemas)"
+          },
+          "outputs": {
+            "type": "object",
+            "description": "What this tool returns"
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "input": { "type": "object" },
+                "output": { "type": "object" }
+              }
+            },
+            "description": "Real usage examples for AI to learn from"
+          },
+          "requires_approval": {
+            "type": "boolean",
+            "default": false,
+            "description": "Must a human approve before execution?"
+          },
+          "rate_limit": {
+            "type": "object",
+            "properties": {
+              "requests_per_minute": { "type": "integer" },
+              "requests_per_hour": { "type": "integer" }
+            },
+            "description": "Rate limiting constraints"
+          },
+          "auth": {
+            "type": "string",
+            "enum": ["none", "api_key", "oauth", "bearer_token", "basic"],
+            "description": "Authentication type required"
+          },
+          "ai_safe": {
+            "type": "boolean",
+            "default": true,
+            "description": "Safe for autonomous AI to call without human review?"
+          }
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "description": "What different agents can and cannot do",
+      "properties": {
+        "default_access": {
+          "type": "string",
+          "enum": ["read", "read_write", "execute", "none"],
+          "default": "read",
+          "description": "Default access level for unknown agents"
+        },
+        "agent_rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["agent_pattern", "access"],
+            "properties": {
+              "agent_pattern": {
+                "type": "string",
+                "description": "Name or pattern (e.g., 'claude-*', 'copilot', 'specific-agent-name')"
+              },
+              "access": {
+                "type": "string",
+                "enum": ["read", "read_write", "execute", "none"],
+                "description": "Access level for matching agents"
+              },
+              "allowed_tools": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Specific tool IDs this agent can use (if empty, all allowed)"
+              },
+              "human_approval_required": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "description": "Other projects, APIs, or services this repo depends on",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "required": {
+            "type": "boolean",
+            "default": false,
+            "description": "Required for basic functionality?"
+          }
+        }
+      }
+    },
+    "documentation": {
+      "type": "object",
+      "description": "Where AIs and humans can learn more",
+      "properties": {
+        "main": {
+          "type": "string",
+          "format": "uri",
+          "description": "Main documentation URL"
+        },
+        "quickstart": {
+          "type": "string",
+          "format": "uri"
+        },
+        "api_spec": {
+          "type": "string",
+          "format": "uri",
+          "description": "Link to OpenAPI, AsyncAPI, or similar"
+        },
+        "examples_dir": {
+          "type": "string",
+          "description": "Path to examples within repo"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional context",
+      "properties": {
+        "maintained": {
+          "type": "boolean",
+          "default": true,
+          "description": "Is this actively maintained?"
+        },
+        "maturity": {
+          "type": "string",
+          "enum": ["experimental", "beta", "stable", "deprecated"],
+          "default": "stable"
+        },
+        "last_updated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When was this catalog last verified?"
+        },
+        "contact": {
+          "type": "string",
+          "description": "Email or GitHub handle for questions"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Topics for discovery (e.g., 'data', 'llm', 'api', 'cli')"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
