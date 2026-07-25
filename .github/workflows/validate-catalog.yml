@@ -1,0 +1,55 @@
+name: Validate AI Catalog
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ai-catalog.json'
+      - '.github/workflows/validate-catalog.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ai-catalog.json'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          npm install ajv
+
+      - name: Validate ai-catalog.json
+        run: |
+          node ./cli/index.js validate ./ai-catalog.json
+
+      - name: Run tests
+        run: |
+          node ./cli/index.js test ./ai-catalog.json
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ ai-catalog.json validated successfully! AI agents can now discover your capabilities.'
+            })
+
+      - name: Fail if validation failed
+        if: failure()
+        run: |
+          echo "❌ Catalog validation failed. Please fix errors in ai-catalog.json"
+          exit 1
