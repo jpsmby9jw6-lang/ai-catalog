@@ -1,0 +1,296 @@
+{
+  "version": "1.0.0",
+  "name": "ai-catalog",
+  "description": "Machine-readable catalog specification for AI agent discovery — robots.txt for AI capabilities. This catalog describes the ai-catalog CLI itself, so agents can discover and use the validator, linter, token meter, and converters.",
+  "repository": {
+    "url": "https://github.com/jpsmby9jw6-lang/ai-catalog",
+    "branch": "main"
+  },
+  "capabilities": [
+    {
+      "id": "catalog_validation",
+      "name": "Catalog Validation",
+      "description": "Validate ai-catalog.json files against the official JSON Schema with human-friendly error messages",
+      "category": "tool"
+    },
+    {
+      "id": "safety_linting",
+      "name": "Safety Linting",
+      "description": "Detect unsafe tool configurations, permission mistakes, and quality gaps beyond what schema validation catches",
+      "category": "tool"
+    },
+    {
+      "id": "change_detection",
+      "name": "Breaking Change Detection",
+      "description": "Compare catalog versions and flag breaking changes with semver hygiene checks",
+      "category": "tool"
+    },
+    {
+      "id": "token_metering",
+      "name": "Token Usage Metering",
+      "description": "Measure what a catalog costs an agent's context window, with per-tool cost breakdowns",
+      "category": "tool"
+    },
+    {
+      "id": "openapi_conversion",
+      "name": "OpenAPI Conversion",
+      "description": "Convert between OpenAPI 3.x specs and ai-catalog format in both directions, preserving safety fields",
+      "category": "tool"
+    },
+    {
+      "id": "catalog_explorer",
+      "name": "Web Catalog Explorer",
+      "description": "Local web UI for browsing catalogs with a visual token meter, searchable tools, and permissions view",
+      "category": "service"
+    }
+  ],
+  "tools": [
+    {
+      "id": "validate",
+      "name": "Validate Catalog",
+      "description": "Validate an ai-catalog.json file against the JSON Schema. Add --json for machine-readable output.",
+      "type": "cli",
+      "endpoint": "node cli/index.js validate <path> [--json]",
+      "inputs": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": { "type": "string", "description": "Path to the ai-catalog.json file" }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "valid": { "type": "boolean" },
+          "errors": { "type": "array" }
+        }
+      },
+      "examples": [
+        {
+          "input": { "path": "examples/api-project.json" },
+          "output": { "valid": true, "errors": [] }
+        }
+      ],
+      "requires_approval": false,
+      "auth": "none",
+      "ai_safe": true
+    },
+    {
+      "id": "lint",
+      "name": "Lint Catalog",
+      "description": "Run safety and quality checks: unsafe tools without approval gates, permission rules referencing unknown tools, stale metadata, missing examples. Nonzero exit on errors — usable as a CI gate.",
+      "type": "cli",
+      "endpoint": "node cli/index.js lint <path> [--json]",
+      "inputs": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": { "type": "string", "description": "Path to the catalog to lint" }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "errors": { "type": "array" },
+          "warnings": { "type": "array" },
+          "info": { "type": "array" }
+        }
+      },
+      "requires_approval": false,
+      "auth": "none",
+      "ai_safe": true
+    },
+    {
+      "id": "diff",
+      "name": "Diff Catalogs",
+      "description": "Compare two catalog versions. Reports added/removed/modified tools and capabilities, permission changes, and breaking changes including semver violations.",
+      "type": "cli",
+      "endpoint": "node cli/index.js diff <old.json> <new.json> [--json]",
+      "inputs": {
+        "type": "object",
+        "required": ["old", "new"],
+        "properties": {
+          "old": { "type": "string", "description": "Path to the older catalog" },
+          "new": { "type": "string", "description": "Path to the newer catalog" }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "hasChanges": { "type": "boolean" },
+          "breaking": { "type": "boolean" },
+          "report": { "type": "object" }
+        }
+      },
+      "requires_approval": false,
+      "auth": "none",
+      "ai_safe": true
+    },
+    {
+      "id": "tokens",
+      "name": "Token Usage Meter",
+      "description": "Estimate what a catalog costs an agent's context window: total tokens, budget bars against 8K/32K/200K windows, per-section and per-tool breakdown, warnings on heavy tools.",
+      "type": "cli",
+      "endpoint": "node cli/index.js tokens <path> [--json]",
+      "inputs": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": { "type": "string", "description": "Path to the catalog to meter" }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "total": { "type": "integer" },
+          "sections": { "type": "object" },
+          "perTool": { "type": "array" },
+          "budgets": { "type": "array" },
+          "warnings": { "type": "array" }
+        }
+      },
+      "requires_approval": false,
+      "auth": "none",
+      "ai_safe": true
+    },
+    {
+      "id": "import_openapi",
+      "name": "Import from OpenAPI",
+      "description": "Convert an OpenAPI 3.x spec (JSON or YAML) into ai-catalog.json. Applies safety defaults: DELETE endpoints are gated with ai_safe:false and requires_approval:true; auth schemes are mapped automatically.",
+      "type": "cli",
+      "endpoint": "node cli/index.js import openapi <spec> [output] [--json]",
+      "inputs": {
+        "type": "object",
+        "required": ["spec"],
+        "properties": {
+          "spec": { "type": "string", "description": "Path to the OpenAPI spec (.json, .yaml, .yml)" },
+          "output": { "type": "string", "description": "Output path (default ai-catalog.json)" }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "output": { "type": "string" },
+          "stats": { "type": "object" }
+        }
+      },
+      "requires_approval": false,
+      "auth": "none",
+      "ai_safe": true
+    },
+    {
+      "id": "export_openapi",
+      "name": "Export to OpenAPI",
+      "description": "Convert ai-catalog.json into an OpenAPI 3.0.3 spec. Safety fields are preserved as x-ai-safe and x-requires-approval extensions.",
+      "type": "cli",
+      "endpoint": "node cli/index.js export openapi <catalog> [output] [--json]",
+      "inputs": {
+        "type": "object",
+        "required": ["catalog"],
+        "properties": {
+          "catalog": { "type": "string", "description": "Path to the catalog to export" },
+          "output": { "type": "string", "description": "Output path (default openapi.json)" }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "output": { "type": "string" },
+          "stats": { "type": "object" }
+        }
+      },
+      "requires_approval": false,
+      "auth": "none",
+      "ai_safe": true
+    },
+    {
+      "id": "serve",
+      "name": "Serve Web Explorer",
+      "description": "Launch a zero-dependency local web UI for a catalog: visual token meter, searchable tool cards with safety badges, permissions view. Serves the raw catalog at /ai-catalog.json and the token report at /tokens.json for agents.",
+      "type": "cli",
+      "endpoint": "node cli/index.js serve <path> [--port=4747]",
+      "inputs": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": { "type": "string", "description": "Path to the catalog to serve" },
+          "port": { "type": "integer", "description": "Port to bind (default 4747)" }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "description": "Local explorer URL" }
+        }
+      },
+      "requires_approval": false,
+      "auth": "none",
+      "ai_safe": true
+    },
+    {
+      "id": "generate",
+      "name": "Generate Catalog",
+      "description": "Interactive wizard that builds a new ai-catalog.json by asking questions. Intended for humans at a terminal, not autonomous agents.",
+      "type": "cli",
+      "endpoint": "node cli/index.js generate [output-path]",
+      "inputs": {
+        "type": "object",
+        "properties": {
+          "output": { "type": "string", "description": "Where to write the generated catalog" }
+        }
+      },
+      "outputs": {
+        "type": "object",
+        "properties": {
+          "catalog": { "type": "object" }
+        }
+      },
+      "requires_approval": true,
+      "auth": "none",
+      "ai_safe": false
+    }
+  ],
+  "permissions": {
+    "default_access": "execute",
+    "agent_rules": [
+      {
+        "agent_pattern": "*",
+        "access": "execute",
+        "allowed_tools": ["validate", "lint", "diff", "tokens", "import_openapi", "export_openapi", "serve"],
+        "human_approval_required": false
+      }
+    ]
+  },
+  "dependencies": [
+    {
+      "name": "Node.js",
+      "url": "https://nodejs.org",
+      "required": true
+    },
+    {
+      "name": "ajv",
+      "url": "https://www.npmjs.com/package/ajv",
+      "required": true
+    },
+    {
+      "name": "js-yaml",
+      "url": "https://www.npmjs.com/package/js-yaml",
+      "required": false
+    }
+  ],
+  "documentation": {
+    "main": "https://github.com/jpsmby9jw6-lang/ai-catalog#readme",
+    "quickstart": "https://github.com/jpsmby9jw6-lang/ai-catalog#quick-start",
+    "examples_dir": "examples/"
+  },
+  "metadata": {
+    "maintained": true,
+    "maturity": "beta",
+    "last_updated": "2026-07-24T16:30:00Z",
+    "contact": "https://github.com/jpsmby9jw6-lang/ai-catalog/issues",
+    "tags": ["ai-agents", "specification", "discovery", "cli", "openapi", "tooling"]
+  }
+}
